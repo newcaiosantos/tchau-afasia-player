@@ -45,9 +45,12 @@ class LocalMediaListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(media.title ?? "[Sem título]"),
-              OutlinedButton(
+              IconButton(
                 onPressed: () => _delete(context),
-                child: Text("Excluir"),
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: Colors.red,
+                ),
               )
             ],
           ),

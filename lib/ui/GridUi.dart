@@ -22,19 +22,21 @@ class GridUi extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: BlocBuilder<MediaBloc, MediaState>(
-          builder: (context, mediaState) {
-            return GridView.builder(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 400,
-              ),
-              itemCount: mediaState.localMedia.length,
-              itemBuilder: (context, index) {
-                final media = mediaState.localMedia[index];
-                return LocalMediaGridItem(media: media);
-              },
-            );
-          },
+        body: SafeArea(
+          child: BlocBuilder<MediaBloc, MediaState>(
+            builder: (context, mediaState) {
+              return GridView.builder(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 300,
+                ),
+                itemCount: mediaState.localMedia.length,
+                itemBuilder: (context, index) {
+                  final media = mediaState.localMedia[index];
+                  return LocalMediaGridItem(media: media);
+                },
+              );
+            },
+          ),
         ),
       ),
     );
