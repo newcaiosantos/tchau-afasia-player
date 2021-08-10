@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,10 +6,10 @@ import 'package:tchauafasiaplayer/bloc/media/MediaBloc.dart';
 import 'package:tchauafasiaplayer/model/MediaModel.dart';
 import 'package:tchauafasiaplayer/tool/MediaTool.dart';
 
-class LocalMediaListItem extends StatelessWidget {
+class LocalMediaGridItem extends StatelessWidget {
   final MediaModel media;
 
-  const LocalMediaListItem({
+  const LocalMediaGridItem({
     required this.media,
   });
 
@@ -18,41 +17,43 @@ class LocalMediaListItem extends StatelessWidget {
       BlocProvider.of<MediaBloc>(context);
 
   _delete(BuildContext context) async {
-    print("[LocalMediaListItem][_delete]");
-    if (!await confirm(context)) return;
+    print("[LocalMediaGridItem][_delete]");
     try {
       await _mediaBloc(context).deleteLocalMedia(media);
-      print("[LocalMediaListItem][_delete] done");
+      print("[LocalMediaGridItem][_delete] done");
     } catch (e) {
-      print("[LocalMediaListItem][_delete] e: $e");
+      print("[LocalMediaGridItem][_delete] e: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Row(
+    return Stack(
+      alignment: Alignment.bottomCenter,
       children: [
         Image.file(
           File(MediaTool.thumbnailPathOf(media)),
-          width: 100,
-          height: 100,
+          width: double.infinity,
+          height: double.infinity,
           fit: BoxFit.cover,
         ),
         Container(
-          padding: EdgeInsets.only(left: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          color: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(media.title ?? "[Sem título]"),
-              OutlinedButton(
-                onPressed: () => _delete(context),
-                child: Text("Excluir"),
-              )
+              Text(
+                media.title ?? "",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
-        )
+        ),
       ],
-    ));
+    );
   }
 }
