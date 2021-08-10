@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
-// part 'MediaModel.g.dart';
+part 'MediaModel.g.dart';
 
+// How to generate adapter: flutter packages pub run build_runner build
 @HiveType(typeId: 0)
 class MediaModel extends Equatable {
   @HiveField(0)

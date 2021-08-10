@@ -12,7 +12,7 @@ class RemoteMediaUi extends StatelessWidget {
 
   _refreshMedia(BuildContext context) async {
     try {
-      await _mediaBloc(context).findMedia();
+      await _mediaBloc(context).findRemoteMedia();
     } catch (e) {
       print("[RemoteMediaUi][_refreshMedia] e: $e");
     }
@@ -24,14 +24,20 @@ class RemoteMediaUi extends StatelessWidget {
       padding: EdgeInsets.all(24),
       child: Column(
         children: [
-          Text("Remote media"),
-          OutlinedButton(
-            onPressed: () => _refreshMedia(context),
-            child: BlocBuilder<MediaBloc, MediaState>(
-              builder: (context, state) {
-                return Text(state.finding ? "Atualizando..." : "Atualizar");
-              },
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Remote media"),
+              SizedBox(width: 8),
+              OutlinedButton(
+                onPressed: () => _refreshMedia(context),
+                child: BlocBuilder<MediaBloc, MediaState>(
+                  builder: (context, state) {
+                    return Text(state.finding ? "Atualizando..." : "Atualizar");
+                  },
+                ),
+              )
+            ],
           ),
           Expanded(
             child: BlocBuilder<MediaBloc, MediaState>(

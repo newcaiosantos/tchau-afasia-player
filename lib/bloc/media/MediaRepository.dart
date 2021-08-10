@@ -1,13 +1,22 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:tchauafasiaplayer/config/BootConfig.dart';
 import 'package:tchauafasiaplayer/model/MediaModel.dart';
 import 'package:tchauafasiaplayer/model/MediaModelPage.dart';
+import 'package:tchauafasiaplayer/tool/MediaTool.dart';
 
 class MediaRepository {
+  late Box<MediaModel> box;
+
+  MediaRepository({
+    required this.box,
+  });
+
   static const String boxId = "mediaBox";
 
-  Future<MediaModelPage> findMedia() async {
+  Future<MediaModelPage> findRemoteMedia() async {
     print("[MediaRepository][findMedia] ");
     final url = "https://tchau-afasia-core.herokuapp.com/media";
     final res = await Dio().get(url, queryParameters: {
@@ -25,30 +34,47 @@ class MediaRepository {
   downloadMedia(MediaModel media) async {
     await _downloadThumbnail(media);
     await _downloadVideo(media);
-    await _saveLocalMedia(media);
   }
 
-  Box get _box {
-    return Hive.box(boxId);
+  List<MediaModel> findLocalMedia() {
+    final List<MediaModel> localMedia = [];
+    box.keys.map((it) => box.get(it)).where((it) => it != null).forEach((it) {
+      localMedia.add(it!);
+    });
+    return localMedia;
   }
 
-  _saveLocalMedia(MediaModel media) async {
-    await _box.put(media.id, media);
+  Future<void> putLocalMedia(MediaModel media) async {
+    await box.put(media.id, media);
+  }
+
+  Future<void> deleteLocalMedia(MediaModel media) async {
+    await box.delete(media.id);
   }
 
   _downloadVideo(MediaModel media) async {
     final url = media.videoUrl;
     if (url == null || url.isEmpty) throw Exception("missing video url");
-    final filename = "${media.id}.mp4";
-    final dir = await getApplicationDocumentsDirectory();
-    return await Dio().download(url, "${dir.path}/$filename");
+    return await Dio().download(url, MediaTool.videoPathOf(media));
   }
 
   _downloadThumbnail(MediaModel media) async {
     final url = media.thumbnailUrl;
     if (url == null || url.isEmpty) throw Exception("missing thumbnail url");
-    final filename = "${media.id}.jpg";
-    final dir = await getApplicationDocumentsDirectory();
-    return await Dio().download(url, "${dir.path}/$filename");
+    return await Dio().download(url, MediaTool.thumbnailPathOf(media));
+  }
+
+  deleteMediaFiles(MediaModel media) async {
+    final thumb = File(MediaTool.thumbnailPathOf(media));
+    final video = File(MediaTool.videoPathOf(media));
+    if (await thumb.exists()) await thumb.delete();
+    if (await video.exists()) await video.delete();
+  }
+
+  Future<List<String>> mediaFilePaths() async {
+    final filePaths = BootConfig.mediaDir.list().map((it) => it.path);
+    return filePaths
+        .where((it) => it.endsWith(".mp4") || it.endsWith(".jpg"))
+        .toList();
   }
 }

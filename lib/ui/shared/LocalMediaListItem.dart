@@ -1,27 +1,28 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tchauafasiaplayer/bloc/media/MediaBloc.dart';
 import 'package:tchauafasiaplayer/model/MediaModel.dart';
+import 'package:tchauafasiaplayer/tool/MediaTool.dart';
 
-class RemoteMediaListItem extends StatelessWidget {
+class LocalMediaListItem extends StatelessWidget {
   final MediaModel media;
 
-  const RemoteMediaListItem({
+  const LocalMediaListItem({
     required this.media,
   });
 
   MediaBloc _mediaBloc(BuildContext context) =>
       BlocProvider.of<MediaBloc>(context);
 
-  _download(BuildContext context) async {
-    print("[RemoteMediaListItem][_download]");
+  _delete(BuildContext context) async {
+    print("[LocalMediaListItem][_delete]");
     try {
-      await _mediaBloc(context).downloadMedia(media);
-      print("[RemoteMediaListItem][_download] done");
+      await _mediaBloc(context).deleteLocalMedia(media);
+      print("[LocalMediaListItem][_delete] done");
     } catch (e) {
-      print("[RemoteMediaListItem][_download] e: $e");
+      print("[LocalMediaListItem][_delete] e: $e");
     }
   }
 
@@ -30,15 +31,12 @@ class RemoteMediaListItem extends StatelessWidget {
     return Container(
         child: Row(
       children: [
-        if (media.thumbnailUrl != null)
-          CachedNetworkImage(
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-            imageUrl: media.thumbnailUrl!,
-            placeholder: (context, url) => Center(child: Text("...")),
-            errorWidget: (context, url, error) => Icon(Icons.error_outline),
-          ),
+        Image.file(
+          File(MediaTool.thumbnailPathOf(media)),
+          width: 100,
+          height: 100,
+          fit: BoxFit.cover,
+        ),
         Container(
           padding: EdgeInsets.only(left: 8),
           child: Column(
@@ -46,8 +44,8 @@ class RemoteMediaListItem extends StatelessWidget {
             children: [
               Text(media.title ?? "[Sem título]"),
               OutlinedButton(
-                onPressed: () => _download(context),
-                child: Text("Download"),
+                onPressed: () => _delete(context),
+                child: Text("Excluir"),
               )
             ],
           ),
